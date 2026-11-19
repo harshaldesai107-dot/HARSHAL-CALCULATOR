@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HARSHAL CALCULATOR</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #080d18;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: .3s;
+}
+
+.calculator {
+  width: 100%;
+  max-width: 430px;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 {
+  color: #55aaff;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+
+.theme {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #192943;
+  color: white;
+  border: none;
+  font-size: 22px;
+}
+
+.display {
+  background: #111c30;
+  border-radius: 20px;
+  min-height: 120px;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  text-align: right;
+  font-size: 38px;
+  overflow-wrap: anywhere;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+button {
+  height: 65px;
+  border: none;
+  border-radius: 17px;
+  background: #192943;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  transition: .15s;
+}
+
+button:active {
+  transform: scale(.93);
+}
+
+.operator {
+  background: #174b83;
+}
+
+.clear {
+  background: #a83249;
+}
+
+.equal {
+  background: #176bd0;
+}
+
+.history {
+  margin-top: 25px;
+  background: #111c30;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.history h3 {
+  color: #55aaff;
+  margin-top: 0;
+}
+
+#historyList {
+  white-space: pre-line;
+  line-height: 2;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.clear-history {
+  height: 45px;
+  width: 100%;
+  font-size: 15px;
+  margin-top: 10px;
+  background: #a83249;
+}
+
+.light {
+  background: #edf2fa;
+  color: #101827;
+}
+
+.light .display,
+.light .history {
+  background: #dce6f5;
+  color: #101827;
+}
+
+.light button:not(.operator):not(.clear):not(.equal) {
+  background: #c5d5eb;
+  color: #101827;
+}
+
+.light .theme {
+  background: #c5d5eb;
+  color: #101827;
+}
+
+.light .operator {
+  background: #9dc4f5;
+  color: #101827;
+}
+
+.light .equal {
+  background: #76aaf0;
+  color: #101827;
+}
+
+.light .clear {
+  background: #f2a5b1;
+  color: #101827;
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+<div class="header">
+<h2>HARSHAL CALCULATOR</h2>
+<button class="theme" onclick="toggleTheme()">☀️</button>
+</div>
+
+<div class="display" id="display">0</div>
+
+<div class="buttons">
+
+<button class="clear" onclick="clearAll()">AC</button>
+<button onclick="del()">DEL</button>
+<button onclick="percentage()">%</button>
+<button class="operator" onclick="add('/')">÷</button>
+
+<button onclick="add('7')">7</button>
+<button onclick="add('8')">8</button>
+<button onclick="add('9')">9</button>
+<button class="operator" onclick="add('*')">×</button>
+
+<button onclick="add('4')">4</button>
+<button onclick="add('5')">5</button>
+<button onclick="add('6')">6</button>
+<button class="operator" onclick="add('-')">−</button>
+
+<button onclick="add('1')">1</button>
+<button onclick="add('2')">2</button>
+<button onclick="add('3')">3</button>
+<button class="operator" onclick="add('+')">+</button>
+
+<button onclick="add('00')">00</button>
+<button onclick="add('0')">0</button>
+<button onclick="add('.')">.</button>
+<button class="equal" onclick="calculate()">=</button>
+
+</div>
+
+<div class="history">
+<h3>Calculation History</h3>
+<div id="historyList">No history yet</div>
+<button class="clear-history" onclick="clearHistory()">
+Clear History
+</button>
+</div>
+
+</div>
+
+<script>
+
+let expression = "";
+let history = [];
+
+function update() {
+ document.getElementById("display").textContent =
+ expression || "0";
+}
+
+function add(value) {
+ expression += value;
+ update();
+}
+
+function clearAll() {
+ expression = "";
+ update();
+}
+
+function del() {
+ expression = expression.slice(0, -1);
+ update();
+}
+
+function percentage() {
+ const match = expression.match(/(\d+\.?\d*)$/);
+
+ if (match) {
+   expression =
+     expression.slice(0, -match[0].length)
+     + String(Number(match[0]) / 100);
+
+   update();
+ }
+}
+
+function calculate() {
+ try {
+   if (!expression ||
+       !/^[0-9+\-*/.() ]+$/.test(expression)) {
+     throw new Error("Invalid");
+   }
+
+   const result = Function(
+     '"use strict"; return (' + expression + ')'
+   )();
+
+   if (!Number.isFinite(result)) {
+     throw new Error("Invalid");
+   }
+
+   const answer = Number(result.toPrecision(12));
+
+   history.unshift(expression + " = " + answer);
+
+   document.getElementById("historyList").textContent =
+     history.slice(0, 10).join("\n");
+
+   expression = String(answer);
+   update();
+
+ } catch(error) {
+   document.getElementById("display").textContent = "Error";
+   expression = "";
+ }
+}
+
+function clearHistory() {
+ history = [];
+
+ document.getElementById("historyList").textContent =
+   "No history yet";
+}
+
+function toggleTheme() {
+ document.body.classList.toggle("light");
+}
+
+</script>
+
+</body>
+</html>
+0
+
